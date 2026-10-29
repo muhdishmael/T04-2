@@ -1,21 +1,21 @@
 const createBarChart = (data) => {
 // --- Sizes (logical vs. display) ---
-const viewW = 500;
-const viewH = Math.max(220, data.length * 28);
-const displayW = 640;
-const displayH = Math.min(480, data.length * 24 + 40);
+const viewW = 800;
+const viewH = Math.max(350, data.length * 35);
+const labelX = 213;
 // --- SVG root ---
 const svg = d3.select(".responsive-svg-container")
 .append("svg")
 .attr("viewBox", `0 0 ${viewW} ${viewH}`)
-.attr("width", displayW)
-.attr("height", displayH)
+.style("width", "100%")
+.style("max-width", `${viewW}px`)
+.style("height", "auto")
 .style("border", "1px solid #ccc");
 // --- Scales (from T04-6) ---
 const xMax = d3.max(data, d => d.count);
 const xScale = d3.scaleLinear()
 .domain([0, xMax])
-.range([0, viewW]);
+.range([0, viewW - labelX - 152]);
 const yScale = d3.scaleBand()
 .domain(data.map(d => d.brand)) 
 .range([0, viewH])
@@ -32,8 +32,7 @@ const yScale = d3.scaleBand()
 .attr("fill", "steelblue");
 */
 // --- NEW in T04-7: group per row (bar + labels move together) ---
-// Using x = 100 so labels align at 100 and bars start there too.
-const labelX = 100;
+// Align labels at x = 213 and start each bar at the same position.
 const barAndLabel = svg
 .selectAll("g")
 .data(data)
@@ -43,18 +42,18 @@ const barAndLabel = svg
 // y is 0 because the group sets vertical position via transform.
 barAndLabel
 .append("rect")
-.attr("x", labelX) // bar starts at x = 100
+.attr("x", labelX)
 .attr("y", 0)
 .attr("width", d => xScale(d.count)) // scaled width fits the viewBox
 .attr("height", yScale.bandwidth()) // bar thickness from band scale
 .attr("fill", "steelblue");
-// --- Category text (left of bar, right-aligned at x=100) ---
+// --- Category text (left of bar, right-aligned at the bar start) ---
 barAndLabel
 .append("text")
 .text(d => d.brand) // change if your category column differs
 .attr("x", labelX)
 .attr("y", 15) // adjust to center in the band
-.attr("text-anchor", "end") // right-align so text ends at x=100
+.attr("text-anchor", "end") // right-align so text ends where the bar starts
 .style("font-family", "sans-serif")
 .style("font-size", "13px");
 // --- Value text (at the end of each bar) ---
@@ -62,7 +61,7 @@ barAndLabel
 .append("text")
 .text(d => d.count) // numeric label
 .attr("x", d => labelX + xScale(d.count) + 4) // just past bar end
-.attr("y", 12) // adjust as needed
+.attr("y", 15) // align with the category label
 .style("font-family", "sans-serif")
 .style("font-size", "13px");
 };
